@@ -11,9 +11,13 @@ use ApiPlatform\Metadata\Delete;
 use App\Repository\JokeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: JokeRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read']],
+    order: ['id' => 'ASC']
+)]
 #[GetCollection]
 #[Post(
     security: "is_granted('ROLE_ADMIN')",
@@ -33,12 +37,15 @@ class Joke
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('read')]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups('read')]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups('read')]
     private ?string $answer = null;
 
     #[ORM\ManyToOne(inversedBy: 'jokes')]

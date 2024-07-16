@@ -13,9 +13,13 @@ use App\Repository\AuthorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
-#[ApiResource]
+#[ApiResource(
+    normalizationContext: ['groups' => ['read']],
+    order: ['name' => 'ASC']
+)]
 #[GetCollection]
 #[Post(
     security: "is_granted('ROLE_ADMIN')",
@@ -35,8 +39,10 @@ class Author
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups('read')]
     private ?int $id = null;
 
+    #[Groups('read')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -44,6 +50,7 @@ class Author
      * @var Collection<int, Joke>
      */
     #[ORM\OneToMany(targetEntity: Joke::class, mappedBy: 'author', orphanRemoval: true)]
+    #[Groups('read')]
     private Collection $jokes;
 
     public function __construct()

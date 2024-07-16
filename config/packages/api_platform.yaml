@@ -14,5 +14,9 @@ api_platform:
     extra_properties:
       standard_put: true
       rfc_7807_compliant_errors: true
+    pagination_client_items_per_page: true
+  collection:
+    pagination:
+      items_per_page_parameter_name: itemsPerPage
   keep_legacy_inflector: false
   use_symfony_listeners: true
