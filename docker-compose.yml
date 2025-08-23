@@ -1,0 +1,34 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    volumes:
+      - .:/var/www/symfony
+    depends_on:
+      - db
+
+  nginx:
+    image: nginx:stable
+    volumes:
+      - .:/var/www/symfony
+      - ./docker/nginx:/etc/nginx/conf.d
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: symfony
+      POSTGRES_USER: symfony
+      POSTGRES_PASSWORD: symfony
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
