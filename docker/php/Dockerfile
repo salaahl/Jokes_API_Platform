@@ -1,4 +1,4 @@
-FROM php:8.3-fpm AS symfony_php
+FROM php:8.3-cli AS symfony_php
 
 # Installer dépendances système
 RUN apt-get update && apt-get install -y \
@@ -11,21 +11,32 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/symfony
 
-# Copier uniquement composer.* pour profiter du cache Docker
+# Copier uniquement composer.* pour le cache Docker
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-interaction --prefer-dist --no-dev
 
 # Copier le reste du projet
 COPY . .
 
-# Créer le dossier var/ (sinon chown plante)
-RUN mkdir -p var \
-    && chown -R www-data:www-data var
+# Créer les dossiers nécessaires et régler les droits
+RUN mkdir -p var public \
+    && chown -R www-data:www-data var public
 
-# Configurer PHP pour production (opcache)
+# Configurer PHP pour prod
 RUN { \
     echo 'opcache.enable=1'; \
     echo 'opcache.memory_consumption=256'; \
     echo 'opcache.max_accelerated_files=20000'; \
     echo 'opcache.validate_timestamps=0'; \
   } > /usr/local/etc/php/conf.d/opcache.ini
+
+# Entrypoint pour migrations + fixtures
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER www-data
+WORKDIR /var/www/symfony
+
+# Lancement du container
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php", "-S", "0.0.0.0:${PORT:-8000}", "-t", "public"]
