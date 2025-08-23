@@ -1,8 +1,8 @@
 FROM php:8.3-cli AS symfony_php
 
-# Installer dépendances système
+# Installer dépendances système + client PostgreSQL
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libicu-dev libzip-dev \
+    git unzip libpq-dev libicu-dev libzip-dev postgresql-client \
     && docker-php-ext-install intl pdo pdo_pgsql opcache zip \
     && rm -rf /var/lib/apt/lists/*
 
@@ -11,7 +11,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/symfony
 
-# Copier uniquement composer.* pour le cache Docker
+# Copier composer.* pour profiter du cache Docker
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-interaction --prefer-dist --no-dev
 
@@ -22,7 +22,7 @@ COPY . .
 RUN mkdir -p var public \
     && chown -R www-data:www-data var public
 
-# Configurer PHP pour prod
+# Configurer PHP pour production (opcache)
 RUN { \
     echo 'opcache.enable=1'; \
     echo 'opcache.memory_consumption=256'; \
