@@ -9,10 +9,8 @@ if [ -z "$DATABASE_URL" ]; then
   exit 1
 fi
 
-# S'assurer que var/ et vendor/ sont accessibles
-mkdir -p var vendor
-chmod -R 775 var vendor
-chown -R www-data:www-data var vendor
+echo "Running composer install..."
+composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-exif --working-dir=/var/www/html || { echo "Composer install failed"; exit 1; }
 
 echo "Running migrations..."
 TRIES=0
