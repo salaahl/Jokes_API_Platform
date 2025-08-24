@@ -1,33 +1,18 @@
 FROM php:8.3-fpm-alpine
 
-# Dépendances système + PostgreSQL
-RUN apk add --no-cache \
-    bash \
-    git \
-    unzip \
-    curl \
-    libpq \
-    libpq-dev \
-    icu-dev \
-    libzip-dev \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
+# Dépendances système et PostgreSQL
+RUN apk add --no-cache bash git unzip curl libpq libpq-dev icu-dev libzip-dev \
+    libpng-dev libjpeg-turbo-dev freetype-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install intl pdo pdo_pgsql gd zip opcache exif \
- && docker-php-ext-enable exif
-
-# Installer Composer de manière fiable
-COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
-RUN chmod +x /usr/local/bin/composer
+ && docker-php-ext-enable exif \
+ && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Définir le dossier de travail
 WORKDIR /var/www/symfony
 
-# Copier composer.* pour profiter du cache Docker
+# Copier composer.* et installer dépendances
 COPY composer.json composer.lock ./
-
-# Installer dépendances Composer
 RUN composer install --no-dev --optimize-autoloader --working-dir=/var/www/symfony
 
 # Copier le reste du projet
