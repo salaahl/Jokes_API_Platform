@@ -10,6 +10,7 @@
     "api-platform/core": "^3.3",
     "doctrine/dbal": "^3",
     "doctrine/doctrine-bundle": "^2.12",
+    "doctrine/doctrine-fixtures-bundle": "*",
     "doctrine/doctrine-migrations-bundle": "^3.3",
     "doctrine/orm": "^3.2",
     "easycorp/easyadmin-bundle": "^4.10",
@@ -81,7 +82,6 @@
     }
   },
   "require-dev": {
-    "doctrine/doctrine-fixtures-bundle": "^3.6",
     "symfony/debug-bundle": "7.1.*",
     "symfony/maker-bundle": "^1.60"
   }
