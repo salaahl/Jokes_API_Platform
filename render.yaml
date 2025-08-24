@@ -1,14 +1,9 @@
 services:
   - type: web
-    name: symfony-api
+    name: symfony-app
     runtime: php
-    plan: free
-    buildCommand: |
-      composer require symfony/runtime --no-interaction
-      composer install --no-dev --optimize-autoloader
-      mkdir -p var/cache var/log var/sessions
-      chmod -R 777 var
-    startCommand: ./start.sh
+    buildCommand: composer install --no-dev --optimize-autoloader && mkdir -p var
+    startCommand: ./render-entrypoint.sh
     envVars:
       - key: APP_ENV
         value: prod
@@ -20,9 +15,7 @@ services:
         fromDatabase:
           name: symfony-db
           property: connectionString
-      - key: CORS_ALLOW_ORIGIN
-        value: "*"
-
+          
   - type: pserv
     name: symfony-db
     plan: free

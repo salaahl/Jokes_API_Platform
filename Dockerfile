@@ -1,64 +1,47 @@
-FROM php:8.3-cli-alpine
+# Dockerfile example
+FROM php:8.2-fpm
 
-# Installer les dépendances système
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     git \
     unzip \
-    postgresql-dev \
-    icu-dev \
-    zip \
-    libzip-dev \
-    oniguruma-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    bash
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Installer les extensions PHP
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_pgsql \
-        intl \
-        zip \
-        mbstring \
-        gd \
-        opcache
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql
 
-# Configuration d'OPcache pour la production
-RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.enable_cli=1" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.interned_strings_buffer=8" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.max_accelerated_files=4000" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.revalidate_freq=2" >> /usr/local/etc/php/conf.d/opcache.ini
+# Create symfony directory with proper permissions BEFORE copying files
+RUN mkdir -p /var/www/symfony && \
+    chown -R www-data:www-data /var/www/symfony && \
+    chmod -R 755 /var/www/symfony
 
-# Installer Composer
-COPY --from=composer:2.7 /usr/bin/composer /usr/local/bin/composer
+# Set working directory
+WORKDIR /var/www/symfony
 
-# Définir le répertoire de travail (chemin standard Render.com)
-WORKDIR /opt/render/project/src
+# Copy composer files first for better caching
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
-# Copier les fichiers de dépendances
-COPY composer.json composer.lock ./
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# Installer les dépendances PHP
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist
+# Install dependencies as www-data
+USER www-data
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copier tout le code source
-COPY . .
+# Copy application files
+COPY --chown=www-data:www-data . .
 
-# Finaliser l'installation de Composer
-RUN composer dump-autoload --classmap-authoritative --no-dev
+# Create var directory with proper permissions
+RUN mkdir -p var/cache var/log && \
+    chmod -R 775 var
 
-# Créer les dossiers nécessaires avec les bonnes permissions
-RUN mkdir -p var/cache var/log var/sessions \
-    && chmod -R 777 var
+# Switch back to root for entrypoint
+USER root
 
-# Copier et rendre exécutable l'entrypoint
-COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy entrypoint script
+COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-EXPOSE 10000
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]
