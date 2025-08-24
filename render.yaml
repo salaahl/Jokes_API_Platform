@@ -1,12 +1,10 @@
 services:
-  # API Symfony
   - type: web
     name: symfony-api
     runtime: docker
     plan: free
-    region: frankfurt
-    branch: main
-    healthCheckPath: /api
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
     envVars:
       - key: APP_ENV
         value: prod
@@ -20,13 +18,7 @@ services:
           property: connectionString
       - key: CORS_ALLOW_ORIGIN
         value: "*"
-      - key: TRUSTED_PROXIES
-        value: "127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
-      - key: TRUSTED_HOSTS
-        value: "^(localhost|.*\\.onrender\\.com)$"
 
-  # Base de données PostgreSQL
   - type: pserv
     name: symfony-db
     plan: free
-    region: frankfurt
