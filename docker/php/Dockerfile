@@ -13,14 +13,16 @@ WORKDIR /var/www/symfony
 
 # Copier composer.* pour profiter du cache Docker
 COPY composer.json composer.lock ./
-RUN composer install --no-scripts --no-interaction --prefer-dist --no-dev
+
+# Installer les dépendances en root
+RUN composer install --no-dev --optimize-autoloader --working-dir=/var/www/symfony
 
 # Copier le reste du projet
 COPY . .
 
-# Créer les dossiers nécessaires et régler les droits
+# Créer var/ et public/ + corriger permissions
 RUN mkdir -p var public \
-    && chown -R www-data:www-data var public
+    && chown -R www-data:www-data var public vendor
 
 # Configurer PHP pour production (opcache)
 RUN { \
@@ -30,13 +32,13 @@ RUN { \
     echo 'opcache.validate_timestamps=0'; \
   } > /usr/local/etc/php/conf.d/opcache.ini
 
-# Entrypoint pour migrations + fixtures
+# Copier entrypoint
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+# Passer à www-data pour exécution
 USER www-data
 WORKDIR /var/www/symfony
 
-# Lancement du container
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php", "-S", "0.0.0.0:${PORT:-8000}", "-t", "public"]

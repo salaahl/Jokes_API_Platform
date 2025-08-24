@@ -1,14 +1,22 @@
 services:
   - type: web
-    name: symfony-app
+    name: jokes-api-platform
     env: docker
-    plan: free
     dockerfilePath: ./Dockerfile
+    branch: main
+    plan: free
     envVars:
-      - key: APP_ENV
-        value: prod
       - key: DATABASE_URL
-        sync: false
-    postDeploy:
-      - php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-      - php bin/console doctrine:fixtures:load --no-interaction
+        fromDatabase:
+          name: jokesdb
+          property: connectionString
+      - key: RUN_FIXTURES
+        value: "true"
+    healthCheckPath: "/"
+    startCommand: "/usr/local/bin/entrypoint.sh php -S 0.0.0.0:${PORT} -t public"
+    buildCommand: ""
+    autoDeploy: true
+
+databases:
+  - name: jokesdb
+    plan: free
