@@ -1,16 +1,25 @@
 FROM php:8.3-fpm-alpine
 
-# Installer dépendances système + PostgreSQL
+# Dépendances système + PostgreSQL
 RUN apk add --no-cache \
-    git unzip libpq libpq-dev icu-dev libzip-dev \
-    libpng-dev libjpeg-turbo-dev freetype-dev \
+    bash \
+    git \
+    unzip \
+    curl \
+    libpq \
+    libpq-dev \
+    icu-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install intl pdo pdo_pgsql gd zip opcache exif \
  && docker-php-ext-enable exif
 
-# Installer Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-RUN chmod +x /usr/bin/composer
+# Installer Composer de manière fiable
+COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
+RUN chmod +x /usr/local/bin/composer
 
 # Définir le dossier de travail
 WORKDIR /var/www/symfony
@@ -29,7 +38,7 @@ RUN mkdir -p var vendor \
     && chown -R www-data:www-data var vendor \
     && chmod -R 775 var vendor
 
-# Configurer PHP pour production (opcache)
+# Configurer OPcache pour production
 RUN { \
     echo 'opcache.enable=1'; \
     echo 'opcache.memory_consumption=256'; \
