@@ -1,38 +1,47 @@
-FROM php:8.3-fpm-alpine
+# Dockerfile example
+FROM php:8.2-fpm
 
-# Dépendances système et PostgreSQL
-RUN apk add --no-cache bash git unzip curl libpq libpq-dev icu-dev libzip-dev \
-    libpng-dev libjpeg-turbo-dev freetype-dev \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install intl pdo pdo_pgsql gd zip opcache exif \
- && docker-php-ext-enable exif
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Définir le dossier de travail
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql
+
+# Create symfony directory with proper permissions BEFORE copying files
+RUN mkdir -p /var/www/symfony && \
+    chown -R www-data:www-data /var/www/symfony && \
+    chmod -R 755 /var/www/symfony
+
+# Set working directory
 WORKDIR /var/www/symfony
 
-# Copier le projet
-COPY . .
+# Copy composer files first for better caching
+COPY --chown=www-data:www-data composer.json composer.lock ./
 
-# Permissions Symfony
-RUN mkdir -p var vendor \
-    && chown -R www-data:www-data var vendor \
-    && chmod -R 775 var vendor
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-# Configurer OPcache pour production
-RUN { \
-    echo 'opcache.enable=1'; \
-    echo 'opcache.memory_consumption=256'; \
-    echo 'opcache.max_accelerated_files=20000'; \
-    echo 'opcache.validate_timestamps=0'; \
-  } > /usr/local/etc/php/conf.d/opcache.ini
+# Install dependencies as www-data
+USER www-data
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copier entrypoint
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+# Copy application files
+COPY --chown=www-data:www-data . .
+
+# Create var directory with proper permissions
+RUN mkdir -p var/cache var/log && \
+    chmod -R 775 var
+
+# Switch back to root for entrypoint
+USER root
+
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-# Passer à www-data pour exécution
-USER www-data
-WORKDIR /var/www/symfony
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["php", "-S", "0.0.0.0:${PORT:-8000}", "-t", "public"]
+CMD ["php-fpm"]
