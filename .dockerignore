@@ -1,35 +1,48 @@
-# Include any files or directories that you don't want to be copied to your
-# container here (e.g., local build artifacts, temporary files, etc.).
-#
-# For more help, visit the .dockerignore file reference guide at
-# https://docs.docker.com/go/build-context-dockerignore/
+# Git
+.git
+.gitignore
 
-**/.classpath
-**/.dockerignore
-**/.env
-**/.git
-**/.gitignore
-**/.project
-**/.settings
-**/.toolstarget
-**/.vs
-**/.vscode
-**/.next
-**/.cache
-**/*.*proj.user
-**/*.dbmdl
-**/*.jfm
-**/charts
-**/docker-compose*
-**/compose.y*ml
-!**/composer.json
-!**/composer.lock
-**/Dockerfile*
-**/node_modules
-**/npm-debug.log
-**/obj
-**/secrets.dev.yaml
-**/values.dev.yaml
-**/vendor
-LICENSE
-README.md
+# Documentation
+*.md
+README*
+
+# Docker
+Dockerfile*
+.dockerignore
+docker-compose*
+
+# Cache et logs
+var/cache/
+var/log/
+var/sessions/
+
+# Dépendances (seront installées dans le container)
+vendor/
+node_modules/
+
+# Configuration locale
+.env.local
+.env.*.local
+.env.test
+.env.dev
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+phpunit.xml*
+
+# Assets de développement
+assets/
+webpack.config.js
+package.json
+package-lock.json
+yarn.lock
