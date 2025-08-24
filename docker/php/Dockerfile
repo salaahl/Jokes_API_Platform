@@ -1,43 +1,40 @@
 FROM php:8.3-fpm-alpine
 
-# Dépendances système et PostgreSQL
-RUN apk add --no-cache bash git unzip curl libpq libpq-dev icu-dev libzip-dev \
-    libpng-dev libjpeg-turbo-dev freetype-dev \
+# Installer dépendances pour PHP et PostgreSQL
+RUN apk add --no-cache \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    unzip \
+    git \
+    libpq \
+    libpq-dev \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install intl pdo pdo_pgsql gd zip opcache exif \
- && docker-php-ext-enable exif \
- && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+ && docker-php-ext-install -j$(nproc) gd pdo pdo_pgsql pgsql exif \
+ && docker-php-ext-enable exif
+
+# Installer Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Définir le dossier de travail
-WORKDIR /var/www/symfony
+WORKDIR /var/www/html
 
-# Copier composer.* et installer dépendances
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --working-dir=/var/www/symfony
-
-# Copier le reste du projet
+# Copier le projet Laravel
 COPY . .
 
-# Permissions Symfony
-RUN mkdir -p var vendor \
-    && chown -R www-data:www-data var vendor \
-    && chmod -R 775 var vendor
+# Copier le build frontend
+COPY --from=node_build /app/public/build /var/www/html/public/build
 
-# Configurer OPcache pour production
-RUN { \
-    echo 'opcache.enable=1'; \
-    echo 'opcache.memory_consumption=256'; \
-    echo 'opcache.max_accelerated_files=20000'; \
-    echo 'opcache.validate_timestamps=0'; \
-  } > /usr/local/etc/php/conf.d/opcache.ini
+# Permissions
+RUN chown -R www-data:www-data var bootstrap/cache \
+    && chmod -R 775 var bootstrap/cache
 
-# Copier entrypoint
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Passer à www-data pour exécution
-USER www-data
-WORKDIR /var/www/symfony
+EXPOSE 80
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["php", "-S", "0.0.0.0:${PORT:-8000}", "-t", "public"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["php", "-S", "0.0.0.0:80", "-t", "public"]
