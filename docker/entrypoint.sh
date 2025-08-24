@@ -1,73 +1,59 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-SYMFONY_DIR="/var/www/symfony"
+echo "🚀 Démarrage de l'application Symfony sur Render.com..."
 
-echo "Checking DATABASE_URL..."
-if [ -z "$DATABASE_URL" ]; then
-  echo "❌ DATABASE_URL is missing."
-  exit 1
-fi
+# Créer le fichier .env avec les variables d'environnement Render
+echo "📝 Création du fichier .env..."
+cat > .env << EOF
+APP_ENV=$APP_ENV
+APP_DEBUG=$APP_DEBUG
+APP_SECRET=$APP_SECRET
+DATABASE_URL=$DATABASE_URL
+EOF
 
-# Ensure we're in the right directory
-cd "$SYMFONY_DIR" || {
-    echo "❌ Cannot access $SYMFONY_DIR"
-    exit 1
-}
+echo "✅ Fichier .env créé"
 
-# Create necessary directories
-mkdir -p var vendor
-chmod -R 775 var vendor 2>/dev/null || {
-    echo "⚠️  Cannot set permissions on var/vendor directories"
-}
+# Créer les dossiers nécessaires
+mkdir -p var/cache var/log var/sessions
+chmod -R 775 var 2>/dev/null || true
 
-# Set ownership if possible (will fail silently if not root)
-chown -R www-data:www-data var vendor 2>/dev/null || true
-
-# Check if composer is available
-if ! command -v composer >/dev/null 2>&1; then
-    echo "❌ Composer not found. Please install composer in your Docker image."
-    exit 1
-fi
-
-echo "✅ Composer found"
-
-echo "Running composer install..."
-# Run composer as current user, avoid permission issues
-COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --working-dir="$SYMFONY_DIR"
-
-# Wait for database
-echo "Waiting for database connection..."
+# Attendre que la base de données soit prête
+echo "🔄 Attente de la base de données..."
 TRIES=0
-until php bin/console doctrine:query:sql "SELECT 1" --env=prod >/dev/null 2>&1; do
-  TRIES=$((TRIES+1))
-  if [ "$TRIES" -ge 60 ]; then
-    echo "❌ Database not reachable after 60s"
-    exit 1
-  fi
-  echo "Attempt $TRIES/60 - waiting for database..."
-  sleep 2
+until php bin/console dbal:run-sql "SELECT 1" --env=prod --no-debug 2>/dev/null; do
+    TRIES=$((TRIES+1))
+    if [ "$TRIES" -ge 30 ]; then
+        echo "❌ Base de données non accessible après 60s"
+        exit 1
+    fi
+    echo "Tentative $TRIES/30 - en attente de la base de données..."
+    sleep 2
 done
-echo "✅ Database reachable"
+echo "✅ Base de données accessible"
 
-# Run migrations
-echo "Running database migrations..."
+# Exécuter les migrations
+echo "🔄 Exécution des migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod --no-debug
 
-# Load fixtures if requested
+# Charger les fixtures si demandé
 if [ "${RUN_FIXTURES:-false}" = "true" ]; then
-  echo "Loading fixtures..."
-  php bin/console doctrine:fixtures:load --no-interaction --append --env=prod --no-debug || true
+    echo "🌱 Chargement des fixtures..."
+    php bin/console doctrine:fixtures:load --no-interaction --append --env=prod --no-debug || true
 fi
 
-# Clear cache
-echo "Clearing cache..."
+# Nettoyer et préchauffer le cache
+echo "🔥 Nettoyage du cache..."
 php bin/console cache:clear --env=prod --no-debug
 
-# Fix final permissions (will work if running as root)
-chmod -R 775 var 2>/dev/null || true
-chown -R www-data:www-data var 2>/dev/null || true
+echo "✅ Application Symfony prête!"
 
-echo "✅ Symfony application setup complete!"
-
-exec "$@"
+# Si des arguments sont passés, les exécuter
+if [ $# -eq 0 ]; then
+    # Aucun argument : démarrer le serveur par défaut
+    echo "🌐 Démarrage du serveur sur le port $PORT..."
+    exec php -S 0.0.0.0:$PORT -t public/
+else
+    # Des arguments sont passés : les exécuter
+    exec "$@"
+fi

@@ -1,22 +1,21 @@
 services:
   - type: web
-    name: jokes-api-platform
-    env: docker
-    dockerfilePath: ./Dockerfile
-    branch: main
-    plan: free
+    name: symfony-app
+    runtime: php
+    buildCommand: composer install --no-dev --optimize-autoloader && mkdir -p var
+    startCommand: ./render-entrypoint.sh
     envVars:
+      - key: APP_ENV
+        value: prod
+      - key: APP_DEBUG
+        value: "0"
+      - key: APP_SECRET
+        generateValue: true
       - key: DATABASE_URL
         fromDatabase:
-          name: jokesdb
+          name: symfony-db
           property: connectionString
-      - key: RUN_FIXTURES
-        value: "true"
-    healthCheckPath: "/"
-    startCommand: "/usr/local/bin/entrypoint.sh php -S 0.0.0.0:${PORT} -t public"
-    buildCommand: ""
-    autoDeploy: true
-
-databases:
-  - name: jokesdb
+          
+  - type: pserv
+    name: symfony-db
     plan: free
