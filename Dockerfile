@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libpq-dev \
+    nginx \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -39,11 +41,13 @@ RUN mkdir -p var/cache var/log && \
 # Switch back to root for entrypoint
 USER root
 
-# Copy entrypoint script
+# Copier configs Nginx et Supervisor
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["php", "-S", "0.0.0.0:80", "-t", "public"]
+CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
