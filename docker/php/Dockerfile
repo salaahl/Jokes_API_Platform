@@ -34,8 +34,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 USER www-data
 WORKDIR /var/www/symfony
 
-RUN chown -R www-data:www-data /var/www/symfony \
-    && chmod -R 775 /var/www/symfony
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php", "-S", "0.0.0.0:${PORT:-8000}", "-t", "public"]
