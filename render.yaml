@@ -1,10 +1,14 @@
 services:
   - type: web
     name: symfony-api
-    runtime: docker
+    runtime: php
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: ./
+    buildCommand: |
+      composer require symfony/runtime --no-interaction
+      composer install --no-dev --optimize-autoloader
+      mkdir -p var/cache var/log var/sessions
+      chmod -R 777 var
+    startCommand: ./start.sh
     envVars:
       - key: APP_ENV
         value: prod
