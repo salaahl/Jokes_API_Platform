@@ -6,8 +6,12 @@ cd /var/www/symfony
 # Installer Composer si nécessaire
 if ! command -v composer >/dev/null 2>&1; then
   echo "Composer not found. Installing..."
-  curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  php composer-setup.php --install-dir=/var/www/symfony --filename=composer
+  php -r "unlink('composer-setup.php');"
 fi
+# Ajouter Composer au PATH
+export PATH="$PATH:/var/www/symfony"
 
 echo "Checking DATABASE_URL..."
 if [ -z "$DATABASE_URL" ]; then
