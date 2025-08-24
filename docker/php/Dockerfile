@@ -1,28 +1,33 @@
-FROM php:8.3-cli AS symfony_php
+FROM php:8.3-fpm-alpine
 
-# Installer dépendances système + client PostgreSQL
-RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libicu-dev libzip-dev postgresql-client \
-    && docker-php-ext-install intl pdo pdo_pgsql opcache zip \
-    && rm -rf /var/lib/apt/lists/*
+# Installer dépendances système + PostgreSQL
+RUN apk add --no-cache \
+    git unzip libpq libpq-dev icu-dev libzip-dev \
+    libpng-dev libjpeg-turbo-dev freetype-dev \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install intl pdo pdo_pgsql gd zip opcache exif \
+ && docker-php-ext-enable exif
 
 # Installer Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN chmod +x /usr/bin/composer
 
+# Définir le dossier de travail
 WORKDIR /var/www/symfony
 
 # Copier composer.* pour profiter du cache Docker
 COPY composer.json composer.lock ./
 
-# Installer les dépendances en root
+# Installer dépendances Composer
 RUN composer install --no-dev --optimize-autoloader --working-dir=/var/www/symfony
 
 # Copier le reste du projet
 COPY . .
 
-# Créer var/ et public/ + corriger permissions
-RUN mkdir -p var public \
-    && chown -R www-data:www-data var public vendor
+# Permissions Symfony
+RUN mkdir -p var vendor \
+    && chown -R www-data:www-data var vendor \
+    && chmod -R 775 var vendor
 
 # Configurer PHP pour production (opcache)
 RUN { \
