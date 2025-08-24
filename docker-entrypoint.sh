@@ -47,6 +47,7 @@ echo "🔥 Nettoyage du cache..."
 php bin/console cache:clear --env=prod --no-debug
 
 echo "✅ Application Symfony prête!"
+echo $APP_ENV
 
 # Si des arguments sont passés, les exécuter
 if [ $# -eq 0 ]; then
