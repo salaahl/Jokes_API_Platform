@@ -18,6 +18,10 @@ services:
     depends_on:
       - php
 
+  composer:
+    image: composer:latest
+    working_dir: /var/www/symfony
+
   db:
     image: postgres:15
     restart: always
