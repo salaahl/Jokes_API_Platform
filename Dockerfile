@@ -43,7 +43,6 @@ USER root
 
 # Copier configs Nginx et Supervisor
 COPY docker/nginx.conf /etc/nginx/nginx.conf
-RUN mkdir -p /var/log/supervisord
 COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh

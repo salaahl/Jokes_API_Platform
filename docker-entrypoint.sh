@@ -53,5 +53,8 @@ if [ $# -eq 0 ]; then
     exec php -S 0.0.0.0:$PORT -t public/
 else
     # Des arguments sont passés : les exécuter
+    mkdir -p /var/log/supervisord
+    exec /usr/bin/supervisord -c /etc/supervisord.conf
+
     exec "$@"
 fi
