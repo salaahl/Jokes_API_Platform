@@ -50,4 +50,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 EXPOSE 80
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Switch back to www-data
+USER www-data
+
 CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
