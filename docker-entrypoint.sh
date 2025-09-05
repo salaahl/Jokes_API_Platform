@@ -34,11 +34,11 @@ echo "✅ Base de données accessible"
 
 # Exécuter les migrations
 echo "🔄 Exécution des migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod --no-debug
+# php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --env=prod --no-debug
 
 # Charger les fixtures
 echo "🌱 Chargement des fixtures..."
-php bin/console doctrine:fixtures:load --no-interaction --append --env=prod --no-debug || true
+# php bin/console doctrine:fixtures:load --no-interaction --append --env=prod --no-debug || true
 
 # Nettoyer et préchauffer le cache
 echo "🔥 Nettoyage du cache..."
