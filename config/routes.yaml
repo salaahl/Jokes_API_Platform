@@ -1,5 +1,5 @@
 # config/routes.yaml
 
-# 1. Charger les annotations de vos contrôleurs
+# 1. Charger les routes définies par attributs dans src/Controller
 controllers:
-    resource: annotations.yaml
+  resource: annotations.yaml
