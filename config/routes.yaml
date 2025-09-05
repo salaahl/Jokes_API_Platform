@@ -2,4 +2,4 @@
 
 # 1. Charger les routes définies par attributs dans src/Controller
 controllers:
-  resource: annotations.yaml
+  resource: ./routes/annotations.yaml
