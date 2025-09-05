@@ -18,9 +18,11 @@ class TranslateController extends AbstractController
         $this->httpClient = $httpClient;
     }
 
-    #[Route('/translate', name: 'translate', methods: ['POST'])]
+    #[Route('/api/translate', name: 'translate', methods: ['POST'])]
     public function translate(Request $request): JsonResponse
     {
+        return $this->json(['status' => 'Route accessible']);
+        
         $data = json_decode($request->getContent(), true);
         if (!isset($data['text'], $data['target_lang'])) {
             return $this->json(
