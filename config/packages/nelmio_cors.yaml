@@ -13,7 +13,7 @@ nelmio_cors:
       allow_methods: ["GET"]
       max_age: 3600
     "^/translate":
-      allow_origin: ["https://quizz-general.onrender.com"]
+      allow_origin: ["*"]
     "^/":
       origin_regex: true
       allow_origin: ["^http://localhost:[0-9]+"]
