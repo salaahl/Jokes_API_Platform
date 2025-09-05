@@ -52,7 +52,7 @@ class TranslateController extends AbstractController
         return $this->json($response->toArray());
     }
 
-    #[Route('api/test-route', name: 'test_route', methods: ['GET'])]
+    #[Route('/test-route', name: 'test_route', methods: ['GET'])]
     public function testRoute(): JsonResponse
     {
         return $this->json(['status' => 'Route fonctionne !']);
