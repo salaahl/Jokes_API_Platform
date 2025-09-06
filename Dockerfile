@@ -4,6 +4,11 @@ FROM php:8.2-fpm-alpine
 ENV APP_ENV=prod
 ENV APP_DEBUG=0
 
+# Autoriser Composer à tourner en tant que root et lancer les plugins
+ENV COMPOSER_ALLOW_SUPERUSER=1
+ENV COMPOSER_ALLOW_PLUGINS=symfony/flex,symfony/runtime,php-http/discovery
+
+
 # Dépendances système
 RUN apk add --no-cache nginx postgresql-dev postgresql-client icu-dev zip unzip git curl
 
