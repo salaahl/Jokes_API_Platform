@@ -1,43 +1,39 @@
 #!/bin/sh
 
-# Démarrage de PHP-FPM en arrière-plan
-php-fpm -D
+echo "DATABASE_URL=${DATABASE_URL}"
 
-echo "Using DATABASE_URL=${DATABASE_URL}"
-php -r "echo getenv('DATABASE_URL');"
-
-# Attendre que la base de données soit prête
-echo "Testing DB connection via psql..."
-psql "$DATABASE_URL" -c "SELECT 1" && echo "psql connection OK" || echo "psql connection FAILED"
-
+# Tester la connexion Doctrine
 echo "Testing DB connection via Doctrine..."
-php bin/console doctrine:query:sql "SELECT 1" && echo "Doctrine connection OK" || echo "Doctrine connection FAILED"
+if php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; then
+  echo "Doctrine connection OK"
+else
+  echo "Doctrine connection FAILED"
+  exit 1
+fi
 
-echo "Attente de la base de données..."
-until php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
-  echo "Base de données non disponible - attente 2s..."
-  sleep 2
-done
+# Tester la connexion psql
+echo "Testing DB connection via psql..."
+if psql "$DATABASE_URL" -c "SELECT 1" > /dev/null 2>&1; then
+  echo "psql connection OK"
+else
+  echo "psql connection FAILED"
+  exit 1
+fi
 
-echo "Base de données disponible !"
-
-# Exécution des migrations
+# Exécuter les migrations
 echo "Exécution des migrations..."
 php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
 
-# Chargement des fixtures (uniquement si APP_ENV != prod ou si LOAD_FIXTURES=1)
+# Chargement des fixtures optionnel
 if [ "$APP_ENV" != "prod" ] || [ "$LOAD_FIXTURES" = "1" ]; then
-    echo "Chargement des fixtures..."
-    php bin/console doctrine:fixtures:load --no-interaction --append || echo "Pas de fixtures à charger"
+  echo "Chargement des fixtures..."
+  php bin/console doctrine:fixtures:load --no-interaction --append || echo "Pas de fixtures à charger"
 fi
 
-# Vider le cache
-echo "Vidage du cache..."
+# Vider le cache et optimiser
 php bin/console cache:clear --env=prod --no-debug
-
-# Optimisation des autoloads
 composer dump-autoload --optimize --classmap-authoritative
 
-# Démarrage de Nginx
-echo "Démarrage de Nginx..."
+# Démarrage de PHP-FPM et Nginx
+php-fpm -D
 exec nginx -g "daemon off;"
