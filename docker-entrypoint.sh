@@ -42,9 +42,10 @@ php bin/console doctrine:fixtures:load --no-interaction --purge-with-truncate --
 
 # Nettoyer et préchauffer le cache
 echo "🔥 Nettoyage du cache..."
-php bin/console cache:clear --no-debug
+php bin/console cache:clear --env=prod
 
 echo "✅ Application Symfony prête!"
+php bin/console debug:router --env=prod
 
 # Si des arguments sont passés, les exécuter
 if [ $# -eq 0 ]; then
