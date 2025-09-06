@@ -1,4 +1,3 @@
-# Dockerfile
 FROM php:8.2-fpm-alpine
 
 # Variables d'environnement
@@ -14,6 +13,9 @@ RUN apk add --no-cache \
     unzip \
     git \
     curl
+
+# Création de l'utilisateur www-data
+RUN addgroup -g 82 -S www-data && adduser -u 82 -D -S -G www-data www-data
 
 # Extensions PHP
 RUN docker-php-ext-install \
@@ -35,18 +37,16 @@ WORKDIR /app
 # Copie des fichiers de dépendances
 COPY composer.json composer.lock ./
 
-# Installation des dépendances PHP (sans dev en production)
+# Installation des dépendances PHP
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Copie du code source
 COPY . .
 
-# Permissions
+# Création du dossier var s'il n'existe pas et permissions
+RUN mkdir -p /app/var
 RUN chown -R www-data:www-data /app/var
 RUN chmod -R 755 /app/var
-
-# Installation des assets (si vous utilisez Webpack Encore)
-# RUN npm install && npm run build
 
 # Script d'initialisation
 COPY docker/init.sh /init.sh
@@ -54,5 +54,4 @@ RUN chmod +x /init.sh
 
 EXPOSE 10000
 
-# Commande de démarrage
 CMD ["/init.sh"]
