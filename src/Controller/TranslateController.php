@@ -21,8 +21,6 @@ class TranslateController extends AbstractController
     #[Route('/translate', name: 'translate')]
     public function translate(Request $request): JsonResponse
     {
-        return $this->json(['status' => 'Route accessible']);
-
         $data = json_decode($request->getContent(), true);
         if (!isset($data['text'], $data['target_lang'])) {
             return $this->json(
@@ -52,7 +50,7 @@ class TranslateController extends AbstractController
         return $this->json($response->toArray());
     }
 
-    #[Route('api/test-route', name: 'test_route', methods: ['GET'])]
+    #[Route('/test-route', name: 'test_route', methods: ['GET'])]
     public function testRoute(): JsonResponse
     {
         return $this->json(['status' => 'Route fonctionne !']);
