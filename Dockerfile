@@ -17,7 +17,7 @@ WORKDIR /app
 
 # Installer toutes les dépendances, y compris symfony/runtime
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN composer install --no-dev --optimize-autoloader
 
 # Copier le code  
 COPY . .
