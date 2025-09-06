@@ -1,15 +1,14 @@
 #!/bin/sh
+set -e
 
+# Debug Runtime
+php -r "var_export(class_exists('Symfony\\Component\\Runtime\\SymfonyRuntime'));exit;"
+# Debug DATABASE_URL
 echo "DATABASE_URL=${DATABASE_URL}"
 
-# Tester la connexion Doctrine
-echo "Testing DB connection via Doctrine..."
-if php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; then
-  echo "Doctrine connection OK"
-else
-  echo "Doctrine connection FAILED"
-  exit 1
-fi
+# Premier test Doctrine
+php bin/console doctrine:query:sql "SELECT 1"
+echo "Doctrine connection OK"
 
 # Tester la connexion psql
 echo "Testing DB connection via psql..."
