@@ -21,8 +21,10 @@ class TranslateController extends AbstractController
     #[Route('/translate', name: 'translate')]
     public function translate(Request $request): JsonResponse
     {
-        $text = $request->request->get('text');
-        $targetLang = $request->request->get('target_lang');
+        $data = $request->toArray();
+
+        $text = $data['text'] ?? null;
+        $targetLang = $data['target_lang'] ?? null;
 
         if (!isset($text, $targetLang)) {
             return $this->json(
