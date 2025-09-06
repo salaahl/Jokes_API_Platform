@@ -1,8 +1,16 @@
 #!/bin/sh
 set -e
 
-composer run-script cache:clear -- --env=prod --no-debug
-composer run-script assets:install -- public
+# Vider et précompiler le cache en production
+echo "Clearing Symfony cache..."
+php bin/console cache:clear --env=prod --no-warmup
+
+echo "Warming up Symfony cache..."
+php bin/console cache:warmup --env=prod
+
+# Installer les assets dans public/
+echo "Installing assets..."
+php bin/console assets:install public --no-interaction
 
 # Debug Runtime
 php -r "var_export(class_exists('Symfony\\Component\\Runtime\\SymfonyRuntime'));exit;"
