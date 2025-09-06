@@ -1,57 +1,58 @@
-# Dockerfile example
-FROM php:8.2-fpm
+# Dockerfile
+FROM php:8.2-fpm-alpine
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
-    libpq-dev \
+# Variables d'environnement
+ENV APP_ENV=prod
+ENV APP_DEBUG=0
+
+# Installation des dépendances système
+RUN apk add --no-cache \
     nginx \
-    supervisor \
-    && rm -rf /var/lib/apt/lists/*
+    postgresql-dev \
+    icu-dev \
+    zip \
+    unzip \
+    git \
+    curl
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo pdo_pgsql
+# Extensions PHP
+RUN docker-php-ext-install \
+    pdo \
+    pdo_pgsql \
+    intl \
+    opcache
 
-# Create symfony directory with proper permissions BEFORE copying files
-RUN mkdir -p /var/www/symfony && \
-    chown -R www-data:www-data /var/www/symfony && \
-    chmod -R 755 /var/www/symfony
+# Installation de Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www/symfony
+# Configuration Nginx
+RUN mkdir -p /var/log/nginx
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 
-# Copy composer files first for better caching
-COPY --chown=www-data:www-data composer.json composer.lock ./
+# Répertoire de travail
+WORKDIR /app
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Copie des fichiers de dépendances
+COPY composer.json composer.lock ./
 
-# Install dependencies as www-data
-USER www-data
+# Installation des dépendances PHP (sans dev en production)
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-# Copy application files
-COPY --chown=www-data:www-data . .
+# Copie du code source
+COPY . .
 
-# Create var directory with proper permissions
-RUN mkdir -p var/cache var/log && \
-    chmod -R 775 var
+# Permissions
+RUN chown -R www-data:www-data /app/var
+RUN chmod -R 755 /app/var
 
-# Switch back to root for entrypoint
-USER root
+# Installation des assets (si vous utilisez Webpack Encore)
+# RUN npm install && npm run build
 
-# Copier configs Nginx et Supervisor
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/supervisord.conf /etc/supervisord.conf
-COPY docker-entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Script d'initialisation
+COPY docker/init.sh /init.sh
+RUN chmod +x /init.sh
 
-EXPOSE 80
+EXPOSE 10000
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-
-# Switch back to www-data
-USER www-data
-
-CMD ["php", "-S", "0.0.0.0:10000", "-t", "public"]
+# Commande de démarrage
+CMD ["/init.sh"]
