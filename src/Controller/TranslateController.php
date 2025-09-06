@@ -21,11 +21,10 @@ class TranslateController extends AbstractController
     #[Route('/translate', name: 'translate')]
     public function translate(Request $request): JsonResponse
     {
-        $data = [
-            'text' => 'Hello, how are you ?',
-            'target_lang' => 'FR',
-        ];
-        if (!isset($data['text'], $data['target_lang'])) {
+        $text = $request->request->get('text');
+        $targetLang = $request->request->get('target_lang');
+
+        if (!isset($text, $targetLang)) {
             return $this->json(
                 ['error' => 'Paramètres invalides, "text" et "target_lang" requis.'],
                 Response::HTTP_BAD_REQUEST
@@ -38,8 +37,8 @@ class TranslateController extends AbstractController
                 'Authorization' => 'DeepL-Auth-Key ' . getenv('DEEPL_AUTH_KEY'),
             ],
             'body' => http_build_query([
-                'text' => $data['text'],
-                'target_lang' => $data['target_lang'],
+                'text' => $text,
+                'target_lang' => $targetLang,
             ]),
         ]);
 
