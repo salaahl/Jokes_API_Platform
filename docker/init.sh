@@ -3,7 +3,16 @@
 # Démarrage de PHP-FPM en arrière-plan
 php-fpm -D
 
+echo "Using DATABASE_URL=${DATABASE_URL}"
+php -r "echo getenv('DATABASE_URL');"
+
 # Attendre que la base de données soit prête
+echo "Testing DB connection via psql..."
+psql "$DATABASE_URL" -c "SELECT 1" && echo "psql connection OK" || echo "psql connection FAILED"
+
+echo "Testing DB connection via Doctrine..."
+php bin/console doctrine:query:sql "SELECT 1" && echo "Doctrine connection OK" || echo "Doctrine connection FAILED"
+
 echo "Attente de la base de données..."
 until php bin/console doctrine:query:sql "SELECT 1" > /dev/null 2>&1; do
   echo "Base de données non disponible - attente 2s..."
