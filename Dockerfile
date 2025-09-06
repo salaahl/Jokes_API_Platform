@@ -27,8 +27,6 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copier le code  
 COPY . .
 
-RUN composer run-script auto-scripts
-
 # Permissions dossier var  
 RUN mkdir -p var && chown -R nginx:nginx var && chmod -R 755 var
 
