@@ -54,4 +54,4 @@ ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 # Switch back to www-data
 USER www-data
 
-CMD ["supervisord", "-n", "-c", "/etc/supervisord.conf"]
+CMD ["php", "-S", "0.0.0.0:10000", "-t", "public"]
