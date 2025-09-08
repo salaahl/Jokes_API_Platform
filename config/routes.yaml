@@ -3,3 +3,11 @@
 # 1. Charger les routes définies par attributs dans src/Controller
 controllers:
   resource: ./routes/annotations.yaml
+
+# 2. Rediriger vers /api
+root_redirect:
+  path: /
+  controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController
+  defaults:
+    path: /api
+    permanent: true

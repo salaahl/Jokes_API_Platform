@@ -8,17 +8,10 @@ nelmio_cors:
     max_age: 3600
   paths:
     "^/api/":
-      allow_origin: ["https://blagues-et-sourires.onrender.com"]
-      allow_headers: ["X-Custom-Auth"]
       allow_methods: ["GET"]
-      max_age: 3600
+      allow_headers: ["X-Custom-Auth"]
     "^/translate":
       allow_methods: ["OPTIONS", "POST"]
-    "^/test-route":
-      allow_origin: ["*"]
-      allow_headers: ["X-Custom-Auth"]
-      allow_methods: ["GET"]
-      max_age: 3600
     "^/":
       origin_regex: true
       allow_origin: ["^http://localhost:[0-9]+"]
