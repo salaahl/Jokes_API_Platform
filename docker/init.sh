@@ -2,22 +2,19 @@
 set -e
 
 # Vider et précompiler le cache en production
-echo "Clearing Symfony cache..."
-php bin/console cache:clear --env=prod --no-warmup
+if [ "$APP_ENV" = "prod" ]; then
+  echo "Clearing Symfony cache..."
+  php bin/console cache:clear --no-warmup
+fi
 
 echo "Warming up Symfony cache..."
-php bin/console cache:warmup --env=prod
+php bin/console cache:warmup 
 
 # Installer les assets dans public/
 echo "Installing assets..."
 php bin/console assets:install public --no-interaction
 
-# Debug Runtime
-php -r "var_export(class_exists('Symfony\\Component\\Runtime\\SymfonyRuntime'));exit;"
-# Debug DATABASE_URL
-echo "DATABASE_URL=${DATABASE_URL}"
-
-# Premier test Doctrine
+# Test Doctrine
 php bin/console doctrine:query:sql "SELECT 1"
 echo "Doctrine connection OK"
 
@@ -41,7 +38,7 @@ if [ "$APP_ENV" != "prod" ] || [ "$LOAD_FIXTURES" = "1" ]; then
 fi
 
 # Vider le cache et optimiser
-php bin/console cache:clear --env=prod --no-debug
+php bin/console cache:clear  --no-debug
 composer dump-autoload --optimize --classmap-authoritative
 
 # Démarrage de PHP-FPM et Nginx
