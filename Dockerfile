@@ -15,14 +15,13 @@ RUN apk add --no-cache nginx postgresql-dev postgresql-client icu-dev zip unzip 
 # Extensions PHP
 RUN docker-php-ext-install pdo pdo_pgsql intl opcache
 
-
-# S'assurer que PHP lit bien les variables d'environnement
-RUN echo "variables_order=EGPCS" > /usr/local/etc/php/conf.d/env-vars.ini
-
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
+
+# Créer un .env vide pour éviter les erreurs si APP_ENV n'est pas détecté
+RUN touch .env
 
 # Installer toutes les dépendances, y compris symfony/runtime
 COPY composer.json composer.lock ./
