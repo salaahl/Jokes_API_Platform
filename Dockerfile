@@ -15,6 +15,10 @@ RUN apk add --no-cache nginx postgresql-dev postgresql-client icu-dev zip unzip 
 # Extensions PHP
 RUN docker-php-ext-install pdo pdo_pgsql intl opcache
 
+
+# S'assurer que PHP lit bien les variables d'environnement
+RUN echo "variables_order=EGPCS" > /usr/local/etc/php/conf.d/env-vars.ini
+
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 

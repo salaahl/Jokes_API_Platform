@@ -1,11 +1,6 @@
 #!/bin/sh
 set -e
 
-# Debug
-echo "Debug des variables d'environnement..."
-echo "APP_ENV=$APP_ENV"
-echo "DATABASE_URL=$DATABASE_URL"
-
 # Vider et précompiler le cache en production
 if [ "$APP_ENV" = "prod" ]; then
   echo "Clearing Symfony cache..."
