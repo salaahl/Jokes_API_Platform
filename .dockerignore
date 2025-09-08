@@ -21,6 +21,7 @@ vendor/
 node_modules/
 
 # Configuration locale
+.env
 .env.local
 .env.*.local
 .env.test

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Controller\Deepl;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -52,11 +52,5 @@ class TranslateController extends AbstractController
         }
 
         return $this->json($response->toArray());
-    }
-
-    #[Route('/test-route', name: 'test_route', methods: ['GET'])]
-    public function testRoute(): JsonResponse
-    {
-        return $this->json(['status' => 'Route fonctionne !']);
     }
 }
