@@ -42,7 +42,7 @@ class Author
     #[Groups('author:read')]
     private ?int $id = null;
 
-    #[Groups('author:read, joke:read')]
+    #[Groups('author:read', 'joke:read')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
