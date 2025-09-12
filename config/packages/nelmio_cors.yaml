@@ -1,16 +1,18 @@
 nelmio_cors:
   defaults:
     origin_regex: true
-    allow_origin: '%env(json:CORS_ALLOW_ORIGIN)%'
+    allow_origin: ["%env(CORS_ALLOW_ORIGIN)%"]
     allow_methods: ["GET", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
     allow_headers: ["Content-Type", "Authorization"]
     expose_headers: ["Link"]
     max_age: 3600
   paths:
     "^/api/":
+      allow_origin: ["^http://localhost:[0-9]+","https://blagues-et-sourires.onrender.com"]
       allow_methods: ["GET"]
       allow_headers: ["X-Custom-Auth"]
     "^/translate":
+      allow_origin: ["https://quizz-general.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
     "^/":
       origin_regex: true
