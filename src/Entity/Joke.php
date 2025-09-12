@@ -50,6 +50,7 @@ class Joke
 
     #[ORM\ManyToOne(inversedBy: 'jokes')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups('read')]
     private ?Author $author = null;
 
     public function __toString(): string
