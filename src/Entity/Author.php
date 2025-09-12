@@ -42,7 +42,7 @@ class Author
     #[Groups('author:read')]
     private ?int $id = null;
 
-    #[Groups('author:read')]
+    #[Groups('author:read, joke:read')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -50,7 +50,7 @@ class Author
      * @var Collection<int, Joke>
      */
     #[ORM\OneToMany(targetEntity: Joke::class, mappedBy: 'author', orphanRemoval: true)]
-    #[Groups('author:read')]
+    #[Groups('author:full')]
     private Collection $jokes;
 
     public function __construct()
