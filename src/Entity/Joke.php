@@ -12,10 +12,12 @@ use App\Repository\JokeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Annotation\MaxDepth;
+
 
 #[ORM\Entity(repositoryClass: JokeRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
+    normalizationContext: ['groups' => ['joke:read'], 'enable_max_depth' => true],
     order: ['id' => 'ASC']
 )]
 #[GetCollection]
@@ -37,20 +39,21 @@ class Joke
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('read')]
+    #[Groups('joke:read')]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups('read')]
+    #[Groups('joke:read')]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups('read')]
+    #[Groups('joke:read')]
     private ?string $answer = null;
 
     #[ORM\ManyToOne(inversedBy: 'jokes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups('read')]
+    #[Groups('joke:read')]
+    #[MaxDepth(1)]
     private ?Author $author = null;
 
     public function __toString(): string

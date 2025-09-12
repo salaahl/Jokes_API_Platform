@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
 #[ApiResource(
-    normalizationContext: ['groups' => ['read']],
+    normalizationContext: ['groups' => ['author:read']],
     order: ['name' => 'ASC']
 )]
 #[GetCollection]
@@ -39,10 +39,10 @@ class Author
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups('read')]
+    #[Groups('author:read')]
     private ?int $id = null;
 
-    #[Groups('read')]
+    #[Groups('author:read')]
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
@@ -50,7 +50,7 @@ class Author
      * @var Collection<int, Joke>
      */
     #[ORM\OneToMany(targetEntity: Joke::class, mappedBy: 'author', orphanRemoval: true)]
-    #[Groups('read')]
+    #[Groups('author:read')]
     private Collection $jokes;
 
     public function __construct()
