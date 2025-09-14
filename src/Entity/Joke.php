@@ -38,15 +38,15 @@ class Joke
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['joke:read', 'author:full'])]
+    #[Groups(['joke:read', 'author:read'])]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Groups(['joke:read', 'author:full'])]
+    #[Groups(['joke:read', 'author:read'])]
     private ?string $content = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['joke:read', 'author:full'])]
+    #[Groups(['joke:read', 'author:read'])]
     private ?string $answer = null;
 
     #[ORM\ManyToOne(inversedBy: 'jokes')]
