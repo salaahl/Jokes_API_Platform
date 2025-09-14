@@ -51,7 +51,7 @@ class Joke
 
     #[ORM\ManyToOne(inversedBy: 'jokes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Groups('joke:read')]
+    #[Groups(['joke:read', 'author:read'])]
     #[MaxDepth(1)]
     private ?Author $author = null;
 

@@ -50,7 +50,7 @@ class Author
      * @var Collection<int, Joke>
      */
     #[ORM\OneToMany(targetEntity: Joke::class, mappedBy: 'author', orphanRemoval: true)]
-    #[Groups(['author:read', 'author:full'])]
+    #[Groups('author:read')]
     private Collection $jokes;
 
     public function __construct()
