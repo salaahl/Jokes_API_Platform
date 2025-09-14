@@ -12,26 +12,25 @@ use App\Repository\JokeRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
-use App\DataProvider\JokeRandomDataProvider;
 
 #[ORM\Entity(repositoryClass: JokeRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['joke:read'], 'enable_max_depth' => true],
-    order: ['id' => 'ASC'],
-    operations: [
-        new GetCollection(),
-        new Post(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
-        new Get(),
-        new Put(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
-        new Delete(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
-        // endpoint random
-        new GetCollection(
-            uriTemplate: '/jokes/random',
-            provider: JokeRandomDataProvider::class,
-            name: 'jokes_random',
-            paginationEnabled: true
-        )
-    ]
+    order: ['id' => 'ASC']
+)]
+#[GetCollection]
+#[Post(
+    security: "is_granted('ROLE_ADMIN')",
+    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
+)]
+#[Get]
+#[Put(
+    security: "is_granted('ROLE_ADMIN')",
+    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
+)]
+#[Delete(
+    security: "is_granted('ROLE_ADMIN')",
+    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
 )]
 class Joke
 {
