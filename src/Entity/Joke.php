@@ -18,23 +18,13 @@ use App\DataProvider\JokeRandomDataProvider;
 #[ApiResource(
     normalizationContext: ['groups' => ['joke:read'], 'enable_max_depth' => true],
     order: ['id' => 'ASC'],
-    paginationItemsPerPage: 10,
     operations: [
         new GetCollection(),
-        new Post(
-            security: "is_granted('ROLE_ADMIN')",
-            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
-        ),
+        new Post(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
         new Get(),
-        new Put(
-            security: "is_granted('ROLE_ADMIN')",
-            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
-        ),
-        new Delete(
-            security: "is_granted('ROLE_ADMIN')",
-            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
-        ),
-        // Route pour blagues aléatoires
+        new Put(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
+        new Delete(security: "is_granted('ROLE_ADMIN')", securityMessage: "Droits nécessaires."),
+        // endpoint random
         new GetCollection(
             uriTemplate: '/jokes/random',
             provider: JokeRandomDataProvider::class,
