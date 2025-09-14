@@ -2,7 +2,7 @@
 
 namespace App\DataProvider;
 
-use ApiPlatform\Doctrine\Orm\Paginator;
+use ApiPlatform\Doctrine\Orm\Paginator as ApiPaginator;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\Joke;
@@ -13,7 +13,7 @@ class JokeRandomDataProvider implements ProviderInterface
 {
     public function __construct(private EntityManagerInterface $em) {}
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Paginator
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ApiPaginator
     {
         $page = $context['pagination']['page'] ?? 1;
         $itemsPerPage = $context['pagination']['items_per_page'] ?? 10;
@@ -24,6 +24,6 @@ class JokeRandomDataProvider implements ProviderInterface
             ->setFirstResult(($page - 1) * $itemsPerPage)
             ->setMaxResults($itemsPerPage);
 
-        return new Paginator(new ORMPaginator($qb));
+        return new ApiPaginator(new ORMPaginator($qb));
     }
 }
