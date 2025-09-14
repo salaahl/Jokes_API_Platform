@@ -17,29 +17,31 @@ use App\DataProvider\JokeRandomDataProvider;
 #[ORM\Entity(repositoryClass: JokeRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['joke:read'], 'enable_max_depth' => true],
-    order: ['id' => 'ASC']
-)]
-#[GetCollection]
-#[Post(
-    security: "is_granted('ROLE_ADMIN')",
-    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
-)]
-#[Get]
-#[
-    Get(
-        uriTemplate: '/jokes/random',
-        provider: JokeRandomDataProvider::class,
-        name: 'joke_random',
-        paginationEnabled: true
-    )
-]
-#[Put(
-    security: "is_granted('ROLE_ADMIN')",
-    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
-)]
-#[Delete(
-    security: "is_granted('ROLE_ADMIN')",
-    securityMessage: 'Désolé, vous ne disposez pas des droits nécessaires pour accomplir cette action.'
+    order: ['id' => 'ASC'],
+    paginationItemsPerPage: 10,
+    operations: [
+        new GetCollection(),
+        new Post(
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
+        ),
+        new Get(),
+        new Put(
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
+        ),
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Désolé, vous ne disposez pas des droits nécessaires."
+        ),
+        // Route pour blagues aléatoires
+        new GetCollection(
+            uriTemplate: '/jokes/random',
+            provider: JokeRandomDataProvider::class,
+            name: 'jokes_random',
+            paginationEnabled: true
+        )
+    ]
 )]
 class Joke
 {
