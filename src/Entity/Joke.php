@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: JokeRepository::class)]
 #[ApiResource(
     normalizationContext: ['groups' => ['joke:read'], 'enable_max_depth' => true],
-    order: ['id' => 'ASC']
+    order: ['id' => 'DESC']
 )]
 #[GetCollection]
 #[Post(
