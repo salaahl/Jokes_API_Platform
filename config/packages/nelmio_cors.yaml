@@ -12,7 +12,7 @@ nelmio_cors:
       allow_methods: ["GET"]
       allow_headers: ["X-Custom-Auth"]
     "^/translate":
-      allow_origin: ["https://quizz-general.onrender.com"]
+      allow_origin: ["https://quizz-general.onrender.com","https://nutriverif.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
     "^/":
       origin_regex: true
