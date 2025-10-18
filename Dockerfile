@@ -1,8 +1,8 @@
 FROM php:8.2-fpm-alpine
 
 # Variables d'environnement
-ENV APP_ENV=prod
-ENV APP_DEBUG=0
+ENV APP_ENV=dev
+ENV APP_DEBUG=1
 
 # Autoriser Composer à tourner en tant que root et lancer les plugins
 ENV COMPOSER_ALLOW_SUPERUSER=1
@@ -25,7 +25,7 @@ RUN touch .env
 
 # Installer toutes les dépendances, y compris symfony/runtime
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN composer install --optimize-autoloader --no-scripts
 
 # Copier le code  
 COPY . .
