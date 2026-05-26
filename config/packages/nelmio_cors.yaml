@@ -8,14 +8,20 @@ nelmio_cors:
     max_age: 3600
   paths:
     "^/api/":
-      allow_origin: ["^http://localhost:[0-9]+","https://blagues-et-sourires.onrender.com"]
+      allow_origin:
+        ["^http://localhost:[0-9]+", "https://blagues-et-sourires.onrender.com"]
       allow_methods: ["GET"]
       allow_headers: ["X-Custom-Auth"]
     "^/translate":
-      allow_origin: ["https://quizz-general.onrender.com","https://nutriverif.onrender.com"]
+      allow_origin:
+        [
+          "https://quizz-general.onrender.com",
+          "https://nutriverif.onrender.com",
+        ]
       allow_methods: ["OPTIONS", "POST"]
     "^/search-products":
-      allow_origin: ["https://nutriverif.onrender.com"]
+      allow_origin:
+        ["^http://localhost:[0-9]+", "https://nutriverif.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
     "^/":
       origin_regex: true
