@@ -7,9 +7,16 @@ nelmio_cors:
     expose_headers: ["Link"]
     max_age: 3600
   paths:
+    "^/$":
+      allow_origin:
+        ["^http://localhost:[0-9]+$", "https://quizz-general.onrender.com"]
+      allow_methods: ["GET", "HEAD"]
     "^/api/":
       allow_origin:
-        ["^http://localhost:[0-9]+", "https://blagues-et-sourires.onrender.com"]
+        [
+          "^http://localhost:[0-9]+$",
+          "https://blagues-et-sourires.onrender.com",
+        ]
       allow_methods: ["GET"]
       allow_headers: ["X-Custom-Auth"]
     "^/translate":
@@ -21,11 +28,11 @@ nelmio_cors:
       allow_methods: ["OPTIONS", "POST"]
     "^/search-products":
       allow_origin:
-        ["^http://localhost:[0-9]+", "https://nutriverif.onrender.com"]
+        ["^http://localhost:[0-9]+$", "https://nutriverif.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
     "^/":
       origin_regex: true
-      allow_origin: ["^http://localhost:[0-9]+"]
+      allow_origin: ["^http://localhost:[0-9]+$"]
       allow_headers: ["X-Custom-Auth"]
       allow_methods: ["POST", "PUT", "GET", "DELETE"]
       max_age: 3600
