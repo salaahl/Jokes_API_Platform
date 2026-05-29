@@ -18,7 +18,7 @@ class NutriverifController extends AbstractController
         $this->httpClient = $httpClient;
     }
 
-    #[Route('/search-products', name: 'search', methods: ['POST'])]
+    #[Route('/search-products', name: 'search_products', methods: ['POST'])]
     public function search(Request $request): JsonResponse
     {
         $data = $request->toArray();
