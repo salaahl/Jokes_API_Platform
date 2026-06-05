@@ -8,7 +8,7 @@ nelmio_cors:
     max_age: 3600
   paths:
     "^/$":
-      allow_origin: ["https://quizz-general.onrender.com"]
+      allow_origin: ["https://quizz-general.onrender.com", "https://nutriverif.onrender.com"]
       allow_methods: ["GET", "HEAD"]
     "^/api/":
       allow_origin: ["https://blagues-et-sourires.onrender.com"]
