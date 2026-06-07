@@ -42,14 +42,23 @@ class NutriverifController extends AbstractController
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
                 ],
             ]);
-            $content = $response->getContent();
 
             $statusCode = $response->getStatusCode();
+
             $this->logger->info('NutriVerif: Réponse OFF', [
                 'status' => $statusCode,
                 'content_type' => $response->getHeaders()['content-type'][0] ?? 'unknown',
-                'preview' => substr($content, 0, 300)
+                'preview' => substr($response->getContent(), 0, 300)
             ]);
+
+            if (200 !== $statusCode) {
+                $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
+
+                return $this->json(
+                    ['error' => 'Erreur lors de l’appel à OpenFoodFacts.', 'status' => $statusCode],
+                    Response::HTTP_BAD_GATEWAY
+                );
+            }
 
             return $this->json($response->toArray());
         } catch (\Exception $e) {
