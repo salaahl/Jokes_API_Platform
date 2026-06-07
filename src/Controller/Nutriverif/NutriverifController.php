@@ -47,7 +47,9 @@ class NutriverifController extends AbstractController
                 ],
             ]);
 
-            $this->logger->error($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $url);
+            $finalUrl = $response->getInfo('url');
+
+            $this->logger->error($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $finalUrl);
 
             $statusCode = $response->getStatusCode();
 
