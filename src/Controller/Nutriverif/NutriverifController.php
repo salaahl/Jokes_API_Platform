@@ -29,6 +29,8 @@ class NutriverifController extends AbstractController
             $url = $data['url'] ?? null;
             $method = strtoupper($data['method'] ?? 'GET');
 
+            $incomingBody = $data['body'] ?? '';
+
             if (!isset($url)) {
                 $this->logger->warning('NutriVerif: Tentative d\'appel sans paramètre "url".');
                 return $this->json(
@@ -37,19 +39,25 @@ class NutriverifController extends AbstractController
                 );
             }
 
-            $response = $this->httpClient->request($method, $url, [
+            $payloadParams = [];
+            parse_str($incomingBody, $payloadParams);
+
+            $payloadParams['user_id'] = $_ENV['OFF_USERNAME'] ?? '';
+            $payloadParams['password'] = $_ENV['OFF_PASSWORD'] ?? '';
+
+            $options = [
                 'headers' => [
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
                 ],
-                'query' => [
-                    'user_id'  => $_ENV['OFF_USERNAME'],
-                    'password' => $_ENV['OFF_PASSWORD'],
-                ],
-            ]);
+            ];
 
-            $finalUrl = $response->getInfo('url');
+            if ('POST' === $method) {
+                $options['body'] = $payloadParams;
+            } else {
+                $options['query'] = $payloadParams;
+            }
 
-            $this->logger->error($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $finalUrl);
+            $response = $this->httpClient->request($method, $url, $options);
 
             $statusCode = $response->getStatusCode();
 
