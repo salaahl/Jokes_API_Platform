@@ -43,17 +43,20 @@ class NutriverifController extends AbstractController
                 ],
             ]);
 
-            $statusCode = $response->getStatusCode();
-            $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
+            $content = $response->getContent();
+            $decoded = json_decode($content, true);
 
-            if (200 !== $statusCode) {
-                $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
-
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('NutriVerif: Réponse non-JSON', [
+                    'content_preview' => substr($content, 0, 500)
+                ]);
                 return $this->json(
-                    ['error' => 'Erreur lors de l’appel à OpenFoodFacts.', 'status' => $statusCode],
+                    ['error' => 'Réponse non-JSON reçue.'],
                     Response::HTTP_BAD_GATEWAY
                 );
             }
+
+            return $this->json($decoded);
 
             return $this->json($response->toArray());
         } catch (\Exception $e) {
