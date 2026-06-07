@@ -40,6 +40,7 @@ class NutriverifController extends AbstractController
             $response = $this->httpClient->request($method, $url, [
                 'headers' => [
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
+                    'auth_basic' => [$_ENV['OFF_USERNAME'], $_ENV['OFF_PASSWORD']],
                 ],
             ]);
 
