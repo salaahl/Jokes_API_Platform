@@ -2,6 +2,7 @@
 
 namespace App\Controller\Nutriverif;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -12,40 +13,57 @@ use Symfony\Component\HttpFoundation\Response;
 class NutriverifController extends AbstractController
 {
     private HttpClientInterface $httpClient;
+    private LoggerInterface $logger;
 
-    public function __construct(HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, LoggerInterface $logger)
     {
         $this->httpClient = $httpClient;
+        $this->logger = $logger;
     }
 
     #[Route('/search-products', name: 'search_products', methods: ['POST'])]
     public function search(Request $request): JsonResponse
     {
-        $data = $request->toArray();
+        try {
+            $data = $request->toArray();
+            $url = $data['url'] ?? null;
+            $method = strtoupper($data['method'] ?? 'GET');
 
-        $url = $data['url'] ?? null;
-        $method = strtoupper($data['method'] ?? 'GET');
+            if (!isset($url)) {
+                $this->logger->warning('NutriVerif: Tentative d\'appel sans paramètre "url".');
+                return $this->json(
+                    ['error' => 'Le paramètre "url" est requis.'],
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
 
-        if (!isset($url)) {
+            $response = $this->httpClient->request($method, $url, [
+                'headers' => [
+                    'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
+                ],
+            ]);
+
+            $statusCode = $response->getStatusCode();
+
+            if (200 !== $statusCode) {
+                $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
+
+                return $this->json(
+                    ['error' => 'Erreur lors de l’appel à OpenFoodFacts.', 'status' => $statusCode],
+                    Response::HTTP_BAD_GATEWAY
+                );
+            }
+
+            return $this->json($response->toArray());
+        } catch (\Exception $e) {
+            $this->logger->critical('NutriVerif: Crash du contrôleur ! Message : ' . $e->getMessage(), [
+                'exception' => $e
+            ]);
+
             return $this->json(
-                ['error' => 'Le paramètre "url" est requis.'],
-                Response::HTTP_BAD_REQUEST
+                ['error' => 'Une erreur interne est survenue.', 'details' => $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
             );
         }
-
-        $response = $this->httpClient->request($method, $url, [
-            'headers' => [
-                'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
-            ],
-        ]);
-
-        if (200 !== $response->getStatusCode()) {
-            return $this->json(
-                ['error' => 'Erreur lors de l’appel à OpenFoodFacts.', 'status' => $response->getStatusCode()],
-                Response::HTTP_BAD_GATEWAY
-            );
-        }
-
-        return $this->json($response->toArray());
     }
 }
