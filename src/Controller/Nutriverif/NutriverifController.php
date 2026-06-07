@@ -42,21 +42,14 @@ class NutriverifController extends AbstractController
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
                 ],
             ]);
-
             $content = $response->getContent();
-            $decoded = json_decode($content, true);
 
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $this->logger->error('NutriVerif: Réponse non-JSON', [
-                    'content_preview' => substr($content, 0, 500)
-                ]);
-                return $this->json(
-                    ['error' => 'Réponse non-JSON reçue.'],
-                    Response::HTTP_BAD_GATEWAY
-                );
-            }
-
-            return $this->json($decoded);
+            $statusCode = $response->getStatusCode();
+            $this->logger->info('NutriVerif: Réponse OFF', [
+                'status' => $statusCode,
+                'content_type' => $response->getHeaders()['content-type'][0] ?? 'unknown',
+                'preview' => substr($content, 0, 300)
+            ]);
 
             return $this->json($response->toArray());
         } catch (\Exception $e) {
