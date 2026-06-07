@@ -43,6 +43,8 @@ class NutriverifController extends AbstractController
                 ],
                 'auth_basic' => [$_ENV['OFF_USERNAME'], $_ENV['OFF_PASSWORD']],
             ]);
+            
+            $this->logger->info($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $url);
 
             $statusCode = $response->getStatusCode();
 
