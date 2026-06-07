@@ -24,8 +24,6 @@ class NutriverifController extends AbstractController
     #[Route('/search-products', name: 'search_products', methods: ['POST'])]
     public function search(Request $request): JsonResponse
     {
-        $this->logger->error($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $url);
-
         try {
             $data = $request->toArray();
             $url = $data['url'] ?? null;
@@ -43,7 +41,10 @@ class NutriverifController extends AbstractController
                 'headers' => [
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
                 ],
-                'auth_basic' => [$_ENV['OFF_USERNAME'], $_ENV['OFF_PASSWORD']],
+                'query' => [
+                    'user_id'  => $_ENV['OFF_USERNAME'],
+                    'password' => $_ENV['OFF_PASSWORD'],
+                ],
             ]);
 
             $this->logger->error($_ENV['OFF_USERNAME'] . ' a appelé OpenFoodFacts avec l\'URL : ' . $url);
