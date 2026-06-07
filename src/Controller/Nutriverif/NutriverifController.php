@@ -45,8 +45,6 @@ class NutriverifController extends AbstractController
 
             $statusCode = $response->getStatusCode();
 
-            $this->logger->warning($response->getHeaders()['content-type'][0] ?? 'unknown');
-
             if (200 !== $statusCode) {
                 $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
 
