@@ -42,8 +42,8 @@ class NutriverifController extends AbstractController
             $payloadParams = [];
             parse_str($incomingBody, $payloadParams);
 
-            $payloadParams['user_id'] = $_ENV['OFF_USERNAME'] ?? '';
-            $payloadParams['password'] = $_ENV['OFF_PASSWORD'] ?? '';
+            // $payloadParams['user_id'] = $_ENV['OFF_USERNAME'] ?? '';
+            // $payloadParams['password'] = $_ENV['OFF_PASSWORD'] ?? '';
 
             $options = [
                 'headers' => [
