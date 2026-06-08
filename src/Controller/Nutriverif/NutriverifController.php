@@ -28,6 +28,7 @@ class NutriverifController extends AbstractController
             $data = $request->toArray();
             $url = $data['url'] ?? null;
             $method = strtoupper($data['method'] ?? 'GET');
+            $incomingBody = $data['body'] ?? '';
 
             if (!isset($url)) {
                 $this->logger->warning('NutriVerif: Tentative d\'appel sans paramètre "url".');
@@ -37,26 +38,56 @@ class NutriverifController extends AbstractController
                 );
             }
 
-            $response = $this->httpClient->request($method, $url, [
+            $payloadParams = [];
+            parse_str($incomingBody, $payloadParams);
+
+            $options = [
                 'headers' => [
                     'User-Agent' => 'NutriVérif/1.0 (sokhona.salaha@gmail.com)',
                 ],
-            ]);
+            ];
+
+            if ('POST' === $method && !empty($payloadParams)) {
+                if (str_contains($url, 'search.openfoodfacts.org')) {
+                    $options['json'] = $payloadParams; // JSON pour Search-a-licious
+                } else {
+                    $options['body'] = $payloadParams; // form-urlencoded pour cgi/search.pl
+                }
+            } elseif ('GET' === $method && !empty($payloadParams)) {
+                $options['query'] = $payloadParams;
+            }
+
+            $response = $this->httpClient->request($method, $url, $options);
 
             $statusCode = $response->getStatusCode();
 
             if (200 !== $statusCode) {
-                $this->logger->error("NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url");
+                $this->logger->error(
+                    "NutriVerif: OpenFoodFacts a renvoyé un code $statusCode pour l'URL : $url"
+                );
 
                 return $this->json(
-                    ['error' => 'Erreur lors de l’appel à OpenFoodFacts.', 'status' => $statusCode],
+                    ['error' => 'Erreur lors de l\'appel à OpenFoodFacts.', 'status' => $statusCode],
                     Response::HTTP_BAD_GATEWAY
                 );
             }
 
-            return $this->json($response->toArray());
+            $content = $response->getContent();
+            $decoded = json_decode($content, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('NutriVerif: Réponse non-JSON', [
+                    'preview' => substr($content, 0, 300)
+                ]);
+                return $this->json(
+                    ['error' => 'Réponse non-JSON reçue.'],
+                    Response::HTTP_BAD_GATEWAY
+                );
+            }
+
+            return $this->json($decoded);
         } catch (\Exception $e) {
-            $this->logger->critical('NutriVerif: Crash du contrôleur ! Message : ' . $e->getMessage(), [
+            $this->logger->critical('NutriVerif: Crash ! Message : ' . $e->getMessage(), [
                 'exception' => $e
             ]);
 
