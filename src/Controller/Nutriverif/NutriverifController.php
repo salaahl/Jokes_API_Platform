@@ -102,21 +102,17 @@ class NutriverifController extends AbstractController
     #[Route('/search-dish', name: 'search_dish', methods: ['POST'])]
     public function searchDish(Request $request, HttpClientInterface $httpClient): JsonResponse
     {
-        error_log("--> [DISH] Début de la requête");
-
         /** @var UploadedFile|null $imageFile */
         $imageFile = $request->files->get('image');
         $notes = (string) $request->request->get('notes', '');
 
         if (!$imageFile || !$imageFile->isValid()) {
-            error_log("--> [DISH] Image invalide");
             return $this->json(['error' => 'Une image valide est requise.'], Response::HTTP_BAD_REQUEST);
         }
 
         // 8 Mo en octets (8 * 1024 * 1024)
         $maxFileSize = 8 * 1024 * 1024;
         if ($imageFile->getSize() > $maxFileSize) {
-            error_log("--> [DISH] Dépassement de la taille maximale de l'image (8 Mo)");
             return $this->json([
                 'error' => 'L\'image est trop volumineuse (8 Mo maximum).'
             ], Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
@@ -124,7 +120,6 @@ class NutriverifController extends AbstractController
 
         $mimeType = $imageFile->getMimeType();
         if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/webp'], true)) {
-            error_log("--> [DISH] Format non supporté : $mimeType");
             return $this->json(['error' => 'Format non supporté (JPEG, PNG ou WEBP uniquement).'], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
@@ -132,7 +127,6 @@ class NutriverifController extends AbstractController
         $apiKey = $_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
 
         if (!$apiKey) {
-            error_log("--> [DISH] Clé API Gemini manquante");
             return $this->json(['error' => 'Clé API Gemini manquante côté serveur.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
@@ -244,7 +238,6 @@ class NutriverifController extends AbstractController
             $statusCode = $response->getStatusCode();
 
             if ($statusCode === 429) {
-                error_log("--> [DISH] Quota dépassé pour l'API Gemini");
                 return $this->json([
                     'error' => 'Quota dépassé. Réessayez dans un instant.',
                 ], Response::HTTP_TOO_MANY_REQUESTS);
@@ -252,7 +245,6 @@ class NutriverifController extends AbstractController
 
             if ($statusCode !== 200) {
                 $rawError = $response->getContent(false);
-                error_log("--> [DISH] Erreur Gemini (HTTP $statusCode) : " . $rawError);
                 return $this->json([
                     'error' => 'Erreur lors de l\'analyse du plat.',
                 ], Response::HTTP_BAD_GATEWAY);
@@ -267,7 +259,6 @@ class NutriverifController extends AbstractController
             $dishData = json_decode($cleanJson, true);
 
             if (json_last_error() !== JSON_ERROR_NONE || !is_array($dishData)) {
-                error_log("--> [DISH] Format JSON inattendu : " . json_last_error_msg());
                 return $this->json([
                     'error' => 'Format de données inattendu retourné par le modèle.',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -297,20 +288,18 @@ class NutriverifController extends AbstractController
                     'salt_100g' => (float) ($dishData['salt_100g'] ?? 0),
                 ],
                 'nutrient_levels' => $dishData['nutrient_levels'] ?? [
-                    'fat' => 'moderate',
-                    'saturated-fat' => 'moderate',
-                    'sugars' => 'moderate',
-                    'salt' => 'moderate',
+                    'fat' => 'unknown',
+                    'saturated-fat' => 'unknown',
+                    'sugars' => 'unknown',
+                    'salt' => 'unknown',
                 ],
                 'additives_tags' => [],
                 'manufacturing_places' => 'Fait maison',
                 'link' => '',
             ];
 
-            error_log("--> [DISH] Analyse terminée avec succès pour : " . $apiProduct['product_name_fr']);
             return $this->json($apiProduct, Response::HTTP_OK);
         } catch (\Throwable $e) {
-            error_log("--> [DISH] Exception Symfony : " . $e->getMessage());
             return $this->json([
                 'error' => 'Une erreur interne est survenue lors de l\'analyse.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
