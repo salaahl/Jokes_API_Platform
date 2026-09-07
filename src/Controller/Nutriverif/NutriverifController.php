@@ -109,6 +109,7 @@ class NutriverifController extends AbstractController
         $notes = (string) $request->request->get('notes', '');
 
         if (!$imageFile || !$imageFile->isValid()) {
+            error_log("--> [DISH] Image invalide");
             return $this->json(['error' => 'Une image valide est requise.'], Response::HTTP_BAD_REQUEST);
         }
 
@@ -116,6 +117,8 @@ class NutriverifController extends AbstractController
         $maxFileSize = 8 * 1024 * 1024;
 
         if ($imageFile->getSize() > $maxFileSize) {
+            error_log("--> [DISH] Dépassement de la taille maximale de l'image : ");
+
             return $this->json([
                 'error' => 'L\'image est trop volumineuse (8 Mo maximum).'
             ], Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
@@ -123,6 +126,7 @@ class NutriverifController extends AbstractController
 
         $mimeType = $imageFile->getMimeType();
         if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+            error_log("--> [DISH] Format non supporté : $mimeType");
             return $this->json(['error' => 'Format non supporté (JPEG, PNG ou WEBP uniquement).'], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
         }
 
