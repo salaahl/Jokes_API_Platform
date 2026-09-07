@@ -248,7 +248,7 @@ class NutriverifController extends AbstractController
             }
 
             if ($statusCode !== 200) {
-                error_log("--> [DISH] Erreur lors de l'analyse du plat.");
+                error_log(printf($response->getContent(false)));
                 return $this->json([
                     'error' => 'Erreur lors de l\'analyse du plat.',
                 ], Response::HTTP_BAD_GATEWAY);
