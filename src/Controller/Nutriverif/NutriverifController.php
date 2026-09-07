@@ -102,6 +102,8 @@ class NutriverifController extends AbstractController
     #[Route('/search-dish', name: 'search_dish', methods: ['POST'])]
     public function searchDish(Request $request, HttpClientInterface $httpClient): JsonResponse
     {
+        error_log("--> [DISH] Début de la requête");
+
         /** @var UploadedFile|null $imageFile */
         $imageFile = $request->files->get('image');
         $notes = (string) $request->request->get('notes', '');
@@ -128,6 +130,7 @@ class NutriverifController extends AbstractController
         $apiKey = $_ENV['GEMINI_API_KEY'] ?? getenv('GEMINI_API_KEY') ?? '';
 
         if (!$apiKey) {
+            error_log("--> [DISH] Clé API Gemini manquante");
             return $this->json(['error' => 'Clé API Gemini manquante côté serveur.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
@@ -238,12 +241,14 @@ class NutriverifController extends AbstractController
             $statusCode = $response->getStatusCode();
 
             if ($statusCode === 429) {
+                error_log("--> [DISH] Quota dépassé pour l'API Gemini");
                 return $this->json([
                     'error' => 'Quota dépassé. Réessayez dans un instant.',
                 ], Response::HTTP_TOO_MANY_REQUESTS);
             }
 
             if ($statusCode !== 200) {
+                error_log("--> [DISH] Erreur lors de l'analyse du plat.");
                 return $this->json([
                     'error' => 'Erreur lors de l\'analyse du plat.',
                 ], Response::HTTP_BAD_GATEWAY);
@@ -258,6 +263,7 @@ class NutriverifController extends AbstractController
             $dishData = json_decode($cleanJson, true);
 
             if (json_last_error() !== JSON_ERROR_NONE || !is_array($dishData)) {
+                error_log("--> [DISH] Format de données inattendu retourné par le modèle.");
                 return $this->json([
                     'error' => 'Format de données inattendu retourné par le modèle.',
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
@@ -289,8 +295,10 @@ class NutriverifController extends AbstractController
                 ], JSON_UNESCAPED_SLASHES),
             ];
 
+            error_log("--> [DISH] Analyse du plat effectuée.");
             return $this->json($apiProduct, Response::HTTP_OK);
         } catch (\Throwable $e) {
+            error_log("--> [DISH] Erreur interne lors de l'analyse: " . $e->getMessage());
             return $this->json([
                 'error' => 'Une erreur interne est survenue lors de l\'analyse.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
