@@ -110,6 +110,15 @@ class NutriverifController extends AbstractController
             return $this->json(['error' => 'Une image valide est requise.'], Response::HTTP_BAD_REQUEST);
         }
 
+        // 8 Mo en octets (8 * 1024 * 1024)
+        $maxFileSize = 8 * 1024 * 1024;
+
+        if ($imageFile->getSize() > $maxFileSize) {
+            return $this->json([
+                'error' => 'L\'image est trop volumineuse (8 Mo maximum).'
+            ], Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
+        }
+
         $mimeType = $imageFile->getMimeType();
         if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/webp'], true)) {
             return $this->json(['error' => 'Format non supporté (JPEG, PNG ou WEBP uniquement).'], Response::HTTP_UNSUPPORTED_MEDIA_TYPE);
