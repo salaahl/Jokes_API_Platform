@@ -245,8 +245,9 @@ class NutriverifController extends AbstractController
 
             if ($statusCode !== 200) {
                 $rawError = $response->getContent(false);
+                error_log("NutriVerif: Erreur lors de l'analyse du plat : " . (is_array($rawError) ? json_encode($rawError) : $rawError));
                 return $this->json([
-                    'error' => 'Erreur lors de l\'analyse du plat.',
+                    "error" => "Erreur lors de l\'analyse du plat." . (is_array($rawError) ? json_encode($rawError) : $rawError),
                 ], Response::HTTP_BAD_GATEWAY);
             }
 
@@ -298,8 +299,10 @@ class NutriverifController extends AbstractController
                 'link' => '',
             ];
 
+            error_log("--> [DISH PRODUCT] :\n" . json_encode($apiProduct, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
             return $this->json($apiProduct, Response::HTTP_OK);
         } catch (\Throwable $e) {
+            error_log('--> [DISH CRITICAL] Exception : ' . $e->getMessage() . "\n" . $e->getTraceAsString());
             return $this->json([
                 'error' => 'Une erreur interne est survenue lors de l\'analyse.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
