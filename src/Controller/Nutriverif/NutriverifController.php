@@ -152,8 +152,8 @@ class NutriverifController extends AbstractController
         // Modèles classés par ordre de priorité
         $models = [
             'gemini-3.8-flash',
-            'gemini-3.5-flash',
-            'gemini-2.5-flash'
+            'gemini-3.6-flash',
+            'gemini-3.5-flash'
         ];
 
         $payload = [
