@@ -175,7 +175,7 @@ class NutriverifController extends AbstractController
                 'response_schema' => [
                     'type' => 'OBJECT',
                     'properties' => [
-                        'product_name_fr' => ['type' => 'STRING'],
+                        'product_name_fr' => ['type' => 'STRING', 'description' => 'Nom représentatif du plat en français. Pas trop long et/ou de détails inutiles.'],
                         'categories_hierarchy' => [
                             'type' => 'ARRAY',
                             'description' => 'Liste de catégories hiérarchiques en français, ex: ["fr:pizzas", "fr:plats-préparés", "fr:plats-préparés-chauds"]',
@@ -193,7 +193,10 @@ class NutriverifController extends AbstractController
                             'type' => 'STRING',
                             'description' => 'Exemple: 350 g',
                         ],
-                        'ingredients_text_with_allergens_fr' => ['type' => 'STRING'],
+                        'ingredients_text_with_allergens_fr' => [
+                            'type' => 'STRING',
+                            'description' => 'Liste complète des ingrédients avec allergènes, en français. Tu peux donner aux allergènes la classe "allergen" pour les mettre en évidence car le texte sera interpréte comme du html.'
+                        ],
                         'energy_kcal_100g' => ['type' => 'STRING'],
                         'carbohydrates_100g' => ['type' => 'STRING'],
                         'sugars_100g' => ['type' => 'STRING'],
