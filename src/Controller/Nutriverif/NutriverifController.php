@@ -178,6 +178,7 @@ class NutriverifController extends AbstractController
                         'product_name_fr' => ['type' => 'STRING'],
                         'categories_hierarchy' => [
                             'type' => 'ARRAY',
+                            'description' => 'Liste de catégories hiérarchiques en français, ex: ["fr:pizzas", "fr:plats-préparés", "fr:plats-préparés-chauds"]',
                             'items' => ['type' => 'STRING'],
                         ],
                         'nutriscore_grade' => [
