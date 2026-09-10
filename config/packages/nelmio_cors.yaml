@@ -22,8 +22,8 @@ nelmio_cors:
         ]
       allow_methods: ["OPTIONS", "POST"]
     "^/search-products":
-      allow_origin: ["https://nutriverif.onrender.com", "http://localhost:5173"]
+      allow_origin: ["https://nutriverif.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
     "^/search-dish":
-      allow_origin: ["https://nutriverif.onrender.com", "http://localhost:5173"]
+      allow_origin: ["https://nutriverif.onrender.com"]
       allow_methods: ["OPTIONS", "POST"]
