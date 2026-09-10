@@ -294,7 +294,7 @@ class NutriverifController extends AbstractController
         // Normalisation des données
         $apiProduct = [
             'id' => 'dish_' . time(),
-            'image_front_url' => '/logo.png',
+            'image_front_url' => '/dish.jpg',
             'brands' => 'Plat',
             'product_name_fr' => (string) ($dishData['product_name_fr'] ?? 'Plat cuisiné'),
             'categories_hierarchy' => array_values(array_map('strval', $dishData['categories_hierarchy'] ?? ['en:meals'])),
@@ -322,7 +322,7 @@ class NutriverifController extends AbstractController
             ],
             'additives_tags' => [],
             'manufacturing_places' => 'N/A',
-            'link' => 'N/A',
+            'link' => '',
         ];
 
         error_log("--> [DISH PRODUCT] :\n" . json_encode($apiProduct, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
