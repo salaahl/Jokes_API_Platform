@@ -178,7 +178,7 @@ class NutriverifController extends AbstractController
                         'product_name_fr' => ['type' => 'STRING', 'description' => 'Nom représentatif du plat en français. Pas trop long et/ou de détails inutiles.'],
                         'categories_hierarchy' => [
                             'type' => 'ARRAY',
-                            'description' => 'Liste de catégories hiérarchiques en français, ex: ["fr:pizzas", "fr:plats-préparés", "fr:plats-préparés-chauds"]',
+                            'description' => 'Liste de catégories hiérarchiques en anglais, ex: ["en:meals", "en:prepared-meals"]',
                             'items' => ['type' => 'STRING'],
                         ],
                         'nutriscore_grade' => [
